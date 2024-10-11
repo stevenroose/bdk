@@ -1538,7 +1538,6 @@ fn test_add_foreign_utxo() {
     let mut builder = wallet1.build_tx();
     builder
         .add_recipient(addr.script_pubkey(), Amount::from_sat(60_000))
-        .only_witness_utxo()
         .add_foreign_utxo(utxo.outpoint, psbt_input, foreign_utxo_satisfaction)
         .unwrap();
     let mut psbt = builder.finish().unwrap();
