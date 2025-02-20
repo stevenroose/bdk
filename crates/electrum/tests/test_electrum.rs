@@ -1,6 +1,8 @@
 use bdk_chain::{
     bitcoin::{hashes::Hash, Address, Amount, ScriptBuf, WScriptHash},
+    keychain_txout::KeychainTxOutIndex,
     local_chain::LocalChain,
+    miniscript::Descriptor,
     spk_client::{FullScanRequest, SyncRequest, SyncResponse},
     spk_txout::SpkTxOutIndex,
     Balance, ConfirmationBlockTime, IndexedTxGraph, Indexer, Merge, TxGraph,
@@ -8,7 +10,7 @@ use bdk_chain::{
 use bdk_electrum::BdkElectrumClient;
 use bdk_testenv::{anyhow, bitcoincore_rpc::RpcApi, TestEnv};
 use core::time::Duration;
-use std::collections::{BTreeSet, HashSet};
+use std::collections::{BTreeSet, HashSet, HashMap};
 use std::str::FromStr;
 
 // Batch size for `sync_with_electrum`.
