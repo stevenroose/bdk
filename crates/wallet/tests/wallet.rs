@@ -866,6 +866,37 @@ fn test_create_tx_confirmation_policy() {
             coin_selection::InsufficientFunds { .. }
         )),
     ));
+
+    // test `ConfirmationSpendPolicy::Confirmations(..)`
+    use bdk_wallet::ConfirmationSpendPolicy;
+    let mut builder = wallet.build_tx();
+    builder
+        // attempt to spend 3 utxos (50k, 25k, 25k)
+        .add_recipient(addr.script_pubkey(), Amount::from_sat(76_000))
+        .confirmation_policy(ConfirmationSpendPolicy::Confirmations(2));
+    assert!(
+        matches!(
+            builder.finish(),
+            Err(CreateTxError::CoinSelection(
+                coin_selection::InsufficientFunds { .. }
+            ))
+        ),
+        "utxo with 0 confirmations should not satisfy 2 confirmations policy"
+    );
+
+    // now add another confirmation
+    insert_anchor(&mut wallet, unconfirmed_txid, anchor);
+    let block = BlockId {
+        height: wallet.latest_checkpoint().height() + 1,
+        hash: Hash::hash(b"2001"),
+    };
+    insert_checkpoint(&mut wallet, block);
+    let mut builder = wallet.build_tx();
+    builder
+        .add_recipient(addr.script_pubkey(), Amount::from_sat(76_000))
+        .confirmation_policy(ConfirmationSpendPolicy::Confirmations(2));
+    let psbt = builder.finish().unwrap();
+    assert_eq!(psbt.unsigned_tx.input.len(), 3);
 }
 
 #[test]

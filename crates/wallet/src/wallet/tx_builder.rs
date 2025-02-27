@@ -857,14 +857,24 @@ pub enum ConfirmationSpendPolicy {
     OnlyConfirmed,
     /// Only use unconfirmed outputs (see [`TxBuilder::only_spend_unconfirmed`])
     OnlyUnconfirmed,
+    /// Number of confirmations needed to spend the output
+    Confirmations(u32),
 }
 
 impl ConfirmationSpendPolicy {
-    pub(crate) fn is_satisfied_by(&self, utxo: &LocalOutput) -> bool {
-        match self {
+    pub(crate) fn is_satisfied_by(&self, utxo: &LocalOutput, current_height: u32) -> bool {
+        match *self {
             ConfirmationSpendPolicy::UnconfirmedAllowed => true,
             ConfirmationSpendPolicy::OnlyConfirmed => utxo.chain_position.is_confirmed(),
             ConfirmationSpendPolicy::OnlyUnconfirmed => !utxo.chain_position.is_confirmed(),
+            ConfirmationSpendPolicy::Confirmations(n) => {
+                let conf_height = utxo
+                    .chain_position
+                    .confirmation_height_upper_bound()
+                    .unwrap_or(u32::MAX);
+                let n_confs = current_height.saturating_add(1).saturating_sub(conf_height);
+                n_confs >= n
+            }
         }
     }
 }

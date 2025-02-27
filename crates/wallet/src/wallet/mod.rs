@@ -2044,22 +2044,27 @@ impl Wallet {
                 if must_only_use_confirmed_tx && !chain_position.is_confirmed() {
                     return false;
                 }
+
+                let current_height = current_height.unwrap_or(self.latest_checkpoint().height());
+
+                if !confirmation_policy.is_satisfied_by(&u.0, current_height) {
+                    return false;
+                }
+
                 if tx.is_coinbase() {
                     debug_assert!(
                         chain_position.is_confirmed(),
                         "coinbase must always be confirmed"
                     );
-                    if let Some(current_height) = current_height {
-                        match chain_position {
-                            ChainPosition::Confirmed { anchor, .. } => {
-                                // https://github.com/bitcoin/bitcoin/blob/c5e67be03bb06a5d7885c55db1f016fbf2333fe3/src/validation.cpp#L373-L375
-                                let spend_height = current_height + 1;
-                                let coin_age_at_spend_height =
-                                    spend_height.saturating_sub(anchor.block_id.height);
-                                spendable &= coin_age_at_spend_height >= COINBASE_MATURITY;
-                            }
-                            ChainPosition::Unconfirmed { .. } => spendable = false,
+                    match chain_position {
+                        ChainPosition::Confirmed { anchor, .. } => {
+                            // https://github.com/bitcoin/bitcoin/blob/c5e67be03bb06a5d7885c55db1f016fbf2333fe3/src/validation.cpp#L373-L375
+                            let spend_height = current_height + 1;
+                            let coin_age_at_spend_height =
+                                spend_height.saturating_sub(anchor.block_id.height);
+                            spendable &= coin_age_at_spend_height >= COINBASE_MATURITY;
                         }
+                        ChainPosition::Unconfirmed { .. } => spendable = false,
                     }
                 }
                 spendable
@@ -2069,7 +2074,6 @@ impl Wallet {
         let mut i = 0;
         may_spend.retain(|u| {
             let retain = (self.keychains().count() == 1 || change_policy.is_satisfied_by(&u.0))
-                && confirmation_policy.is_satisfied_by(&u.0)
                 && !unspendable.contains(&u.0.outpoint)
                 && satisfies_confirmed[i];
             i += 1;
