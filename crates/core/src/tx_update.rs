@@ -19,7 +19,6 @@ use bitcoin::{OutPoint, Transaction, TxOut, Txid};
 /// tx_update.anchors.insert((anchor, txid));
 /// ```
 #[derive(Debug, Clone)]
-#[non_exhaustive]
 pub struct TxUpdate<A = ()> {
     /// Full transactions. These are transactions that were determined to be relevant to the wallet
     /// given the request.

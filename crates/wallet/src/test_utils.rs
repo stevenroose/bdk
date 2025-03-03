@@ -309,9 +309,10 @@ pub fn insert_checkpoint(wallet: &mut Wallet, block: BlockId) {
 pub fn insert_tx(wallet: &mut Wallet, tx: Transaction) {
     wallet
         .apply_update(Update {
-            tx_update: bdk_chain::TxUpdate {
-                txs: vec![Arc::new(tx)],
-                ..Default::default()
+            tx_update: {
+				let mut ret = bdk_chain::TxUpdate::default();
+                ret.txs = vec![Arc::new(tx)];
+				ret
             },
             ..Default::default()
         })
@@ -324,9 +325,10 @@ pub fn insert_tx(wallet: &mut Wallet, tx: Transaction) {
 pub fn insert_anchor(wallet: &mut Wallet, txid: Txid, anchor: ConfirmationBlockTime) {
     wallet
         .apply_update(Update {
-            tx_update: tx_graph::TxUpdate {
-                anchors: [(anchor, txid)].into(),
-                ..Default::default()
+            tx_update: {
+				let mut ret = tx_graph::TxUpdate::default();
+                ret.anchors = [(anchor, txid)].into();
+				ret
             },
             ..Default::default()
         })
@@ -337,9 +339,10 @@ pub fn insert_anchor(wallet: &mut Wallet, txid: Txid, anchor: ConfirmationBlockT
 pub fn insert_seen_at(wallet: &mut Wallet, txid: Txid, seen_at: u64) {
     wallet
         .apply_update(crate::Update {
-            tx_update: tx_graph::TxUpdate {
-                seen_ats: [(txid, seen_at)].into_iter().collect(),
-                ..Default::default()
+            tx_update: {
+				let mut ret = tx_graph::TxUpdate::default();
+                ret.seen_ats = [(txid, seen_at)].into_iter().collect();
+				ret
             },
             ..Default::default()
         })

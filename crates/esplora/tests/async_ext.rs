@@ -7,7 +7,7 @@ use bdk_esplora::EsploraAsyncExt;
 use bdk_testenv::bitcoincore_rpc::json::CreateRawTransactionInput;
 use bdk_testenv::bitcoincore_rpc::RawTx;
 use esplora_client::{self, Builder};
-use miniscript::Descriptor;
+use bdk_chain::miniscript::Descriptor;
 use std::collections::{BTreeSet, HashMap, HashSet};
 use std::str::FromStr;
 use std::thread::sleep;

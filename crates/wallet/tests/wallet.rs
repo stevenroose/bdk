@@ -1,6 +1,7 @@
 use std::path::Path;
 use std::str::FromStr;
 use std::sync::Arc;
+use std::collections::HashSet;
 
 use anyhow::Context;
 use assert_matches::assert_matches;
@@ -4360,6 +4361,7 @@ fn test_wallet_transactions_relevant() {
     let other_tx_node = other_wallet.get_tx(other_txid).unwrap().tx_node;
     let other_tx_confirmationblocktime = other_tx_node.anchors.iter().last().unwrap();
     let other_tx_update = TxUpdate {
+		evicted_ats: HashSet::new(),
         txs: vec![other_tx_node.tx],
         txouts: Default::default(),
         anchors: [(*other_tx_confirmationblocktime, other_txid)].into(),

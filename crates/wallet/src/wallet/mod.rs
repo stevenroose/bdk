@@ -2319,7 +2319,7 @@ impl Wallet {
         changeset.merge(index_changeset.into());
         changeset.merge(
             self.indexed_graph
-                .apply_update_at(update.tx_update, Some(seen_at))
+                .apply_update(update.tx_update)
                 .into(),
         );
         self.stage.merge(changeset);
