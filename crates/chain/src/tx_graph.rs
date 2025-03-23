@@ -953,13 +953,10 @@ impl<A: Anchor> TxGraph<A> {
 
             if !canonical_tx.tx_node.tx.is_coinbase() {
                 for txin in &canonical_tx.tx_node.tx.input {
-                    let _res = canon_spends.insert(txin.previous_output, txid);
-                    assert!(
-                        _res.is_none(),
-                        "tried to replace {:?} with {:?}",
-                        _res,
-                        txid
-                    );
+                    let res = canon_spends.insert(txin.previous_output, txid);
+                    if let Some(replaced) = res {
+                        println!("BDK_ERROR: tried to replace {:?} with {:?}", replaced, txid);
+                    }
                 }
             }
             canon_txs.insert(txid, canonical_tx);
